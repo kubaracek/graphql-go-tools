@@ -68,7 +68,7 @@ func TestExecutorEngine_StartOperation(t *testing.T) {
 				Times(1)
 
 			engine := ExecutorEngine{
-				logger:           abstractlogger.Noop{},
+				logger:           logger.Noop{},
 				subCancellations: subscriptionCancellations{},
 				executorPool:     executorPoolMock,
 				bufferPool: &sync.Pool{
@@ -141,7 +141,7 @@ func TestExecutorEngine_StartOperation(t *testing.T) {
 				Times(1)
 
 			engine := ExecutorEngine{
-				logger:           abstractlogger.Noop{},
+				logger:           logger.Noop{},
 				subCancellations: subscriptionCancellations{},
 				executorPool:     executorPoolMock,
 				bufferPool: &sync.Pool{
@@ -209,7 +209,7 @@ func TestExecutorEngine_StartOperation(t *testing.T) {
 				MinTimes(2)
 
 			engine := ExecutorEngine{
-				logger:           abstractlogger.Noop{},
+				logger:           logger.Noop{},
 				subCancellations: subscriptionCancellations{},
 				executorPool:     executorPoolMock,
 				bufferPool: &sync.Pool{
@@ -273,7 +273,7 @@ func TestExecutorEngine_StartOperation(t *testing.T) {
 				MinTimes(2)
 
 			engine := ExecutorEngine{
-				logger:           abstractlogger.Noop{},
+				logger:           logger.Noop{},
 				subCancellations: subscriptionCancellations{},
 				executorPool:     executorPoolMock,
 				bufferPool: &sync.Pool{
@@ -341,7 +341,7 @@ func TestExecutorEngine_StartOperation(t *testing.T) {
 			Times(1)
 
 		engine := ExecutorEngine{
-			logger:           abstractlogger.Noop{},
+			logger:           logger.Noop{},
 			subCancellations: subscriptionCancellations{},
 			executorPool:     executorPoolMock,
 			bufferPool: &sync.Pool{
@@ -408,7 +408,7 @@ func TestExecutorEngine_StopSubscription(t *testing.T) {
 		Times(1)
 
 	engine := ExecutorEngine{
-		logger:           abstractlogger.Noop{},
+		logger:           logger.Noop{},
 		subCancellations: subscriptionCancellations{},
 		executorPool:     executorPoolMock,
 		bufferPool: &sync.Pool{
@@ -475,7 +475,7 @@ func TestExecutorEngine_TerminateAllConnections(t *testing.T) {
 		Times(3)
 
 	engine := ExecutorEngine{
-		logger:           abstractlogger.Noop{},
+		logger:           logger.Noop{},
 		subCancellations: subscriptionCancellations{},
 		executorPool:     executorPoolMock,
 		bufferPool: &sync.Pool{

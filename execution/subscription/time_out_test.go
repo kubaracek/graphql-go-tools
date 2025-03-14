@@ -20,7 +20,7 @@ func TestTimeOutChecker(t *testing.T) {
 		timeOutCtx, timeOutCancel := context.WithCancel(context.Background())
 		params := TimeOutParams{
 			Name:            "",
-			Logger:          abstractlogger.Noop{},
+			Logger:          logger.Noop{},
 			TimeOutContext:  timeOutCtx,
 			TimeOutAction:   timeOutAction,
 			TimeOutDuration: 100 * time.Millisecond,
@@ -47,7 +47,7 @@ func TestTimeOutChecker(t *testing.T) {
 
 		params := TimeOutParams{
 			Name:            "",
-			Logger:          abstractlogger.Noop{},
+			Logger:          logger.Noop{},
 			TimeOutContext:  timeOutCtx,
 			TimeOutAction:   timeOutAction,
 			TimeOutDuration: 10 * time.Millisecond,

@@ -52,7 +52,7 @@ type Client interface {
 
 // Handler is the actual subscription handler which will keep track on how to handle messages coming from the client.
 type Handler struct {
-	logger abstractlogger.Logger
+	logger logger.Logger
 	// client will hold the subscription client implementation.
 	client Client
 	// keepAliveInterval is the actual interval on which the server send keep alive messages to the client.
@@ -70,7 +70,7 @@ type Handler struct {
 }
 
 func NewHandlerWithInitFunc(
-	logger abstractlogger.Logger,
+	logger logger.Logger,
 	client Client,
 	executorPool ExecutorPool,
 	initFunc WebsocketInitFunc,
@@ -103,7 +103,7 @@ func NewHandlerWithInitFunc(
 }
 
 // NewHandler creates a new subscription handler.
-func NewHandler(logger abstractlogger.Logger, client Client, executorPool ExecutorPool) (*Handler, error) {
+func NewHandler(logger logger.Logger, client Client, executorPool ExecutorPool) (*Handler, error) {
 	return NewHandlerWithInitFunc(logger, client, executorPool, nil)
 }
 
@@ -114,7 +114,7 @@ func (h *Handler) Handle(ctx context.Context) {
 	for {
 		if !h.client.IsConnected() {
 			h.logger.Debug("subscription.Handler.Handle()",
-				abstractlogger.String("message", "client has disconnected"),
+				logger.String("message", "client has disconnected"),
 			)
 
 			return
@@ -123,8 +123,8 @@ func (h *Handler) Handle(ctx context.Context) {
 		message, err := h.client.ReadFromClient()
 		if err != nil {
 			h.logger.Error("subscription.Handler.Handle()",
-				abstractlogger.Error(err),
-				abstractlogger.Any("message", message),
+				logger.Error(err),
+				logger.Any("message", message),
 			)
 
 			h.handleConnectionError("could not read message from client")
@@ -199,7 +199,7 @@ func (h *Handler) handleStart(ctx context.Context, id string, payload []byte) {
 	executor, err := h.executorPool.Get(payload)
 	if err != nil {
 		h.logger.Error("subscription.Handler.handleStart()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 
 		h.handleError(id, graphqlerrors.RequestErrorsFromError(err))
@@ -241,7 +241,7 @@ func (h *Handler) handleNonSubscriptionOperation(ctx context.Context, id string,
 		err := h.executorPool.Put(executor)
 		if err != nil {
 			h.logger.Error("subscription.Handle.handleNonSubscriptionOperation()",
-				abstractlogger.Error(err),
+				logger.Error(err),
 			)
 		}
 	}()
@@ -256,7 +256,7 @@ func (h *Handler) handleNonSubscriptionOperation(ctx context.Context, id string,
 	err := executor.Execute(buf)
 	if err != nil {
 		h.logger.Error("subscription.Handle.handleNonSubscriptionOperation()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 
 		h.handleError(id, graphqlerrors.RequestErrorsFromError(err))
@@ -264,7 +264,7 @@ func (h *Handler) handleNonSubscriptionOperation(ctx context.Context, id string,
 	}
 
 	h.logger.Debug("subscription.Handle.handleNonSubscriptionOperation()",
-		abstractlogger.ByteString("execution_result", buf.Bytes()),
+		logger.ByteString("execution_result", buf.Bytes()),
 	)
 
 	h.sendData(id, buf.Bytes())
@@ -277,7 +277,7 @@ func (h *Handler) startSubscription(ctx context.Context, id string, executor Exe
 		err := h.executorPool.Put(executor)
 		if err != nil {
 			h.logger.Error("subscription.Handle.startSubscription()",
-				abstractlogger.Error(err),
+				logger.Error(err),
 			)
 		}
 	}()
@@ -306,7 +306,7 @@ func (h *Handler) startSubscription(ctx context.Context, id string, executor Exe
 func (h *Handler) executeSubscription(buf *graphql.EngineResultWriter, id string, executor Executor) {
 	buf.SetFlushCallback(func(data []byte) {
 		h.logger.Debug("subscription.Handle.executeSubscription()",
-			abstractlogger.ByteString("execution_result", data),
+			logger.ByteString("execution_result", data),
 		)
 		h.sendData(id, data)
 	})
@@ -315,7 +315,7 @@ func (h *Handler) executeSubscription(buf *graphql.EngineResultWriter, id string
 	err := executor.Execute(buf)
 	if err != nil {
 		h.logger.Error("subscription.Handle.executeSubscription()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 
 		h.handleError(id, graphqlerrors.RequestErrorsFromError(err))
@@ -325,7 +325,7 @@ func (h *Handler) executeSubscription(buf *graphql.EngineResultWriter, id string
 	if buf.Len() > 0 {
 		data := buf.Bytes()
 		h.logger.Debug("subscription.Handle.executeSubscription()",
-			abstractlogger.ByteString("execution_result", data),
+			logger.ByteString("execution_result", data),
 		)
 		h.sendData(id, data)
 	}
@@ -348,7 +348,7 @@ func (h *Handler) sendData(id string, responseData []byte) {
 	err := h.client.WriteToClient(dataMessage)
 	if err != nil {
 		h.logger.Error("subscription.Handler.sendData()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 	}
 }
@@ -365,7 +365,7 @@ func (h *Handler) sendComplete(id string) {
 	err := h.client.WriteToClient(completeMessage)
 	if err != nil {
 		h.logger.Error("subscription.Handler.sendComplete()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 	}
 }
@@ -375,7 +375,7 @@ func (h *Handler) handleConnectionTerminate() {
 	err := h.client.Disconnect()
 	if err != nil {
 		h.logger.Error("subscription.Handler.handleConnectionTerminate()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 	}
 }
@@ -401,7 +401,7 @@ func (h *Handler) sendKeepAlive() {
 	err := h.client.WriteToClient(keepAliveMessage)
 	if err != nil {
 		h.logger.Error("subscription.Handler.sendKeepAlive()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 	}
 }
@@ -410,8 +410,8 @@ func (h *Handler) terminateConnection(reason interface{}) {
 	payloadBytes, err := json.Marshal(reason)
 	if err != nil {
 		h.logger.Error("subscription.Handler.terminateConnection()",
-			abstractlogger.Error(err),
-			abstractlogger.Any("errorPayload", reason),
+			logger.Error(err),
+			logger.Any("errorPayload", reason),
 		)
 	}
 
@@ -423,13 +423,13 @@ func (h *Handler) terminateConnection(reason interface{}) {
 	err = h.client.WriteToClient(connectionErrorMessage)
 	if err != nil {
 		h.logger.Error("subscription.Handler.terminateConnection()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 
 		err := h.client.Disconnect()
 		if err != nil {
 			h.logger.Error("subscription.Handler.terminateConnection()",
-				abstractlogger.Error(err),
+				logger.Error(err),
 			)
 		}
 	}
@@ -440,8 +440,8 @@ func (h *Handler) handleConnectionError(errorPayload interface{}) {
 	payloadBytes, err := json.Marshal(errorPayload)
 	if err != nil {
 		h.logger.Error("subscription.Handler.handleConnectionError()",
-			abstractlogger.Error(err),
-			abstractlogger.Any("errorPayload", errorPayload),
+			logger.Error(err),
+			logger.Any("errorPayload", errorPayload),
 		)
 	}
 
@@ -453,13 +453,13 @@ func (h *Handler) handleConnectionError(errorPayload interface{}) {
 	err = h.client.WriteToClient(connectionErrorMessage)
 	if err != nil {
 		h.logger.Error("subscription.Handler.handleConnectionError()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 
 		err := h.client.Disconnect()
 		if err != nil {
 			h.logger.Error("subscription.Handler.handleError()",
-				abstractlogger.Error(err),
+				logger.Error(err),
 			)
 		}
 	}
@@ -470,8 +470,8 @@ func (h *Handler) handleError(id string, errors graphqlerrors.RequestErrors) {
 	payloadBytes, err := json.Marshal(errors)
 	if err != nil {
 		h.logger.Error("subscription.Handler.handleError()",
-			abstractlogger.Error(err),
-			abstractlogger.Any("errors", errors),
+			logger.Error(err),
+			logger.Any("errors", errors),
 		)
 	}
 
@@ -484,7 +484,7 @@ func (h *Handler) handleError(id string, errors graphqlerrors.RequestErrors) {
 	err = h.client.WriteToClient(errorMessage)
 	if err != nil {
 		h.logger.Error("subscription.Handler.handleError()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 	}
 }

@@ -770,7 +770,7 @@ func (f *FakeFactory[T]) UpstreamSchema(dataSourceConfig DataSourceConfiguration
 	return f.upstreamSchema, true
 }
 
-func (f *FakeFactory[T]) Planner(logger abstractlogger.Logger) DataSourcePlanner[T] {
+func (f *FakeFactory[T]) Planner(logger logger.Logger) DataSourcePlanner[T] {
 	source := &StatefulSource{}
 	go source.Start()
 	return &FakePlanner[T]{

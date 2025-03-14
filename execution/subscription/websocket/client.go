@@ -42,7 +42,7 @@ func NewCloseReason(code uint16, reason string) CloseReason {
 
 // Client is an actual implementation of the subscription client interface.
 type Client struct {
-	logger abstractlogger.Logger
+	logger logger.Logger
 	// clientConn holds the actual connection to the client.
 	clientConn net.Conn
 	// isClosedConnection indicates if the websocket connection is closed.
@@ -51,7 +51,7 @@ type Client struct {
 }
 
 // NewClient will create a new websocket subscription client.
-func NewClient(logger abstractlogger.Logger, clientConn net.Conn) *Client {
+func NewClient(logger logger.Logger, clientConn net.Conn) *Client {
 	return &Client{
 		logger:     logger,
 		clientConn: clientConn,
@@ -75,9 +75,9 @@ func (c *Client) ReadBytesFromClient() ([]byte, error) {
 		}
 
 		c.logger.Error("websocket.Client.ReadBytesFromClient: after reading from client",
-			abstractlogger.Error(err),
-			abstractlogger.ByteString("data", data),
-			abstractlogger.Any("opCode", opCode),
+			logger.Error(err),
+			logger.ByteString("data", data),
+			logger.Any("opCode", opCode),
 		)
 
 		c.isClosedConnectionError(err)
@@ -100,8 +100,8 @@ func (c *Client) WriteBytesToClient(message []byte) error {
 		return subscription.ErrTransportClientClosedConnection
 	} else if err != nil {
 		c.logger.Error("websocket.Client.WriteBytesToClient: after writing to client",
-			abstractlogger.Error(err),
-			abstractlogger.ByteString("message", message),
+			logger.Error(err),
+			logger.ByteString("message", message),
 		)
 
 		return err
@@ -120,7 +120,7 @@ func (c *Client) IsConnected() bool {
 // Disconnect will close the websocket connection.
 func (c *Client) Disconnect() error {
 	c.logger.Debug("websocket.Client.Disconnect: before disconnect",
-		abstractlogger.String("message", "disconnecting client"),
+		logger.String("message", "disconnecting client"),
 	)
 	c.changeConnectionStateToClosed()
 	return c.clientConn.Close()
@@ -137,19 +137,19 @@ func (c *Client) DisconnectWithReason(reason interface{}) error {
 		err = c.writeCompiledFrame(reason)
 	default:
 		c.logger.Error("websocket.Client.DisconnectWithReason: on reason/frame parsing",
-			abstractlogger.String("message", "unknown reason provided"),
+			logger.String("message", "unknown reason provided"),
 		)
 		frame := NewCloseReason(4400, "unknown reason")
 		err = c.writeFrame(ws.Frame(frame))
 	}
 
 	c.logger.Debug("websocket.Client.DisconnectWithReason: before sending close frame",
-		abstractlogger.String("message", "disconnecting client"),
+		logger.String("message", "disconnecting client"),
 	)
 
 	if err != nil {
 		c.logger.Error("websocket.Client.DisconnectWithReason: after writing close reason",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 		return err
 	}

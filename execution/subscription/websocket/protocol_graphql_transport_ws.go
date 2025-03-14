@@ -50,7 +50,7 @@ type GraphQLTransportWSMessageSubscribePayload struct {
 
 // GraphQLTransportWSMessageReader can be used to read graphql-transport-ws messages.
 type GraphQLTransportWSMessageReader struct {
-	logger abstractlogger.Logger
+	logger logger.Logger
 }
 
 // Read deserializes a byte slice to the GraphQLTransportWSMessage struct.
@@ -59,8 +59,8 @@ func (g *GraphQLTransportWSMessageReader) Read(data []byte) (*GraphQLTransportWS
 	err := json.Unmarshal(data, &message)
 	if err != nil {
 		g.logger.Error("websocket.GraphQLTransportWSMessageReader.Read: on json unmarshal",
-			abstractlogger.Error(err),
-			abstractlogger.ByteString("data", data),
+			logger.Error(err),
+			logger.ByteString("data", data),
 		)
 
 		return nil, err
@@ -74,8 +74,8 @@ func (g *GraphQLTransportWSMessageReader) DeserializeSubscribePayload(message *G
 	err := json.Unmarshal(message.Payload, &deserializedPayload)
 	if err != nil {
 		g.logger.Error("websocket.GraphQLTransportWSMessageReader.DeserializeSubscribePayload: on subscribe payload deserialization",
-			abstractlogger.Error(err),
-			abstractlogger.ByteString("payload", message.Payload),
+			logger.Error(err),
+			logger.ByteString("payload", message.Payload),
 		)
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (g *GraphQLTransportWSMessageReader) DeserializeSubscribePayload(message *G
 
 // GraphQLTransportWSMessageWriter can be used to write graphql-transport-ws messages to a transport client.
 type GraphQLTransportWSMessageWriter struct {
-	logger abstractlogger.Logger
+	logger logger.Logger
 	mu     *sync.Mutex
 	Client subscription.TransportClient
 }
@@ -153,10 +153,10 @@ func (g *GraphQLTransportWSMessageWriter) write(message *GraphQLTransportWSMessa
 	jsonData, err := json.Marshal(message)
 	if err != nil {
 		g.logger.Error("websocket.GraphQLTransportWSMessageWriter.write: on json marshal",
-			abstractlogger.Error(err),
-			abstractlogger.String("id", message.Id),
-			abstractlogger.String("type", string(message.Type)),
-			abstractlogger.Any("payload", message.Payload),
+			logger.Error(err),
+			logger.String("id", message.Id),
+			logger.String("type", string(message.Type)),
+			logger.Any("payload", message.Payload),
 		)
 		return err
 	}
@@ -167,7 +167,7 @@ func (g *GraphQLTransportWSMessageWriter) write(message *GraphQLTransportWSMessa
 
 // GraphQLTransportWSEventHandler can be used to handle subscription events and forward them to a GraphQLTransportWSMessageWriter.
 type GraphQLTransportWSEventHandler struct {
-	logger             abstractlogger.Logger
+	logger             logger.Logger
 	Writer             GraphQLTransportWSMessageWriter
 	OnConnectionOpened func()
 }
@@ -198,10 +198,10 @@ func (g *GraphQLTransportWSEventHandler) Emit(eventType subscription.EventType, 
 
 		if err != nil {
 			g.logger.Error("websocket.GraphQLTransportWSEventHandler.Emit: on duplicate subscriber id handling",
-				abstractlogger.Error(err),
-				abstractlogger.String("id", id),
-				abstractlogger.String("type", string(messageType)),
-				abstractlogger.ByteString("payload", data),
+				logger.Error(err),
+				logger.String("id", id),
+				logger.String("type", string(messageType)),
+				logger.ByteString("payload", data),
 			)
 		}
 		return
@@ -229,11 +229,11 @@ func (g *GraphQLTransportWSEventHandler) HandleWriteEvent(messageType GraphQLTra
 		err = g.Writer.WritePong(data)
 	default:
 		g.logger.Warn("websocket.GraphQLTransportWSEventHandler.HandleWriteEvent: on write event handling with unexpected message type",
-			abstractlogger.Error(err),
-			abstractlogger.String("id", id),
-			abstractlogger.String("type", string(messageType)),
-			abstractlogger.ByteString("payload", data),
-			abstractlogger.Error(providedErr),
+			logger.Error(err),
+			logger.String("id", id),
+			logger.String("type", string(messageType)),
+			logger.ByteString("payload", data),
+			logger.Error(providedErr),
 		)
 		err = g.Writer.Client.DisconnectWithReason(
 			NewCloseReason(
@@ -243,28 +243,28 @@ func (g *GraphQLTransportWSEventHandler) HandleWriteEvent(messageType GraphQLTra
 		)
 		if err != nil {
 			g.logger.Error("websocket.GraphQLTransportWSEventHandler.HandleWriteEvent: after disconnecting on write event handling with unexpected message type",
-				abstractlogger.Error(err),
-				abstractlogger.String("id", id),
-				abstractlogger.String("type", string(messageType)),
-				abstractlogger.ByteString("payload", data),
+				logger.Error(err),
+				logger.String("id", id),
+				logger.String("type", string(messageType)),
+				logger.ByteString("payload", data),
 			)
 		}
 		return
 	}
 	if err != nil {
 		g.logger.Error("websocket.GraphQLTransportWSEventHandler.HandleWriteEvent: on write event handling",
-			abstractlogger.Error(err),
-			abstractlogger.String("id", id),
-			abstractlogger.String("type", string(messageType)),
-			abstractlogger.ByteString("payload", data),
-			abstractlogger.Error(providedErr),
+			logger.Error(err),
+			logger.String("id", id),
+			logger.String("type", string(messageType)),
+			logger.ByteString("payload", data),
+			logger.Error(providedErr),
 		)
 	}
 }
 
 // ProtocolGraphQLTransportWSHandlerOptions can be used to provide options to the graphql-transport-ws protocol handler.
 type ProtocolGraphQLTransportWSHandlerOptions struct {
-	Logger                    abstractlogger.Logger
+	Logger                    logger.Logger
 	WebSocketInitFunc         InitFunc
 	CustomKeepAliveInterval   time.Duration
 	CustomInitTimeOutDuration time.Duration
@@ -272,7 +272,7 @@ type ProtocolGraphQLTransportWSHandlerOptions struct {
 
 // ProtocolGraphQLTransportWSHandler is able to handle the graphql-transport-ws protocol.
 type ProtocolGraphQLTransportWSHandler struct {
-	logger                        abstractlogger.Logger
+	logger                        logger.Logger
 	reader                        GraphQLTransportWSMessageReader
 	eventHandler                  GraphQLTransportWSEventHandler
 	connectionInitialized         bool
@@ -293,14 +293,14 @@ func NewProtocolGraphQLTransportWSHandler(client subscription.TransportClient) (
 // NewProtocolGraphQLTransportWSHandlerWithOptions creates a new ProtocolGraphQLTransportWSHandler. It requires an option struct.
 func NewProtocolGraphQLTransportWSHandlerWithOptions(client subscription.TransportClient, opts ProtocolGraphQLTransportWSHandlerOptions) (*ProtocolGraphQLTransportWSHandler, error) {
 	protocolHandler := &ProtocolGraphQLTransportWSHandler{
-		logger: abstractlogger.Noop{},
+		logger: logger.Noop{},
 		reader: GraphQLTransportWSMessageReader{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 		},
 		eventHandler: GraphQLTransportWSEventHandler{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Writer: GraphQLTransportWSMessageWriter{
-				logger: abstractlogger.Noop{},
+				logger: logger.Noop{},
 				Client: client,
 				mu:     &sync.Mutex{},
 			},
@@ -355,8 +355,8 @@ func (p *ProtocolGraphQLTransportWSHandler) Handle(ctx context.Context, engine s
 			return nil
 		}
 		p.logger.Error("websocket.ProtocolGraphQLTransportWSHandler.Handle: on message reading",
-			abstractlogger.Error(err),
-			abstractlogger.ByteString("payload", data),
+			logger.Error(err),
+			logger.ByteString("payload", data),
 		)
 		return err
 	}
@@ -365,7 +365,7 @@ func (p *ProtocolGraphQLTransportWSHandler) Handle(ctx context.Context, engine s
 		ctx, err = p.handleInit(ctx, message.Payload)
 		if err != nil {
 			p.logger.Error("websocket.ProtocolGraphQLTransportWSHandler.Handle: on handling init",
-				abstractlogger.Error(err),
+				logger.Error(err),
 			)
 			p.closeConnectionWithReason(
 				CompiledCloseReasonInternalServerError,
@@ -515,7 +515,7 @@ func (p *ProtocolGraphQLTransportWSHandler) closeConnectionWithReason(reason int
 	)
 	if err != nil {
 		p.logger.Error("websocket.ProtocolGraphQLTransportWSHandler.closeConnectionWithReason: after trying to disconnect with reason",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 	}
 }

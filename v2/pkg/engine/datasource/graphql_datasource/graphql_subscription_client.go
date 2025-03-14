@@ -60,7 +60,7 @@ type subscriptionClient struct {
 	useHttpClientWithSkipRoundTrip bool
 
 	engineCtx                  context.Context
-	log                        abstractlogger.Logger
+	log                        logger.Logger
 	hashPool                   sync.Pool
 	onWsConnectionInitCallback *OnWsConnectionInitCallback
 
@@ -110,7 +110,7 @@ func NewInvalidWsSubprotocolError(invalidProtocol string) InvalidWsSubprotocolEr
 
 type Options func(options *opts)
 
-func WithLogger(log abstractlogger.Logger) Options {
+func WithLogger(log logger.Logger) Options {
 	return func(options *opts) {
 		options.log = log
 	}
@@ -161,7 +161,7 @@ func WithNetPollConfiguration(config NetPollConfiguration) Options {
 
 type opts struct {
 	readTimeout                time.Duration
-	log                        abstractlogger.Logger
+	log                        logger.Logger
 	onWsConnectionInitCallback *OnWsConnectionInitCallback
 	netPollConfiguration       NetPollConfiguration
 }
@@ -186,7 +186,7 @@ func IsDefaultGraphQLSubscriptionClient(client GraphQLSubscriptionClient) bool {
 func NewGraphQLSubscriptionClient(httpClient, streamingClient *http.Client, engineCtx context.Context, options ...Options) GraphQLSubscriptionClient {
 	op := &opts{
 		readTimeout: time.Millisecond * 100,
-		log:         abstractlogger.NoopLogger,
+		log:         logger.NoopLogger,
 	}
 
 	op.netPollConfiguration.ApplyDefaults()
@@ -305,7 +305,7 @@ func (c *subscriptionClient) subscribeWS(requestContext, engineContext context.C
 			if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 				return
 			}
-			c.log.Error("subscriptionClient.subscribeWS", abstractlogger.Error(err))
+			c.log.Error("subscriptionClient.subscribeWS", logger.Error(err))
 		}
 	}()
 
@@ -327,7 +327,7 @@ func (c *subscriptionClient) asyncSubscribeWS(requestContext, engineContext cont
 		go func() {
 			err := conn.handler.StartBlocking()
 			if err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, context.Canceled) {
-				c.log.Error("subscriptionClient.asyncSubscribeWS", abstractlogger.Error(err))
+				c.log.Error("subscriptionClient.asyncSubscribeWS", logger.Error(err))
 			}
 		}()
 		return nil
@@ -687,7 +687,7 @@ func (c *subscriptionClient) runNetPoll(ctx context.Context) {
 		case <-c.netPollState.waitForEventsTick:
 			events, err := c.netPoll.Wait(c.netPollConfig.WaitForNumEvents)
 			if err != nil {
-				c.log.Error("netPoll.Wait", abstractlogger.Error(err))
+				c.log.Error("netPoll.Wait", logger.Error(err))
 				continue
 			}
 
@@ -737,7 +737,7 @@ func (c *subscriptionClient) runNetPoll(ctx context.Context) {
 }
 
 func (c *subscriptionClient) close() {
-	defer c.log.Debug("subscriptionClient.close", abstractlogger.String("reason", "netPoll closed by context"))
+	defer c.log.Debug("subscriptionClient.close", logger.String("reason", "netPoll closed by context"))
 	if c.netPollState.waitForEventsTicker != nil {
 		c.netPollState.waitForEventsTicker.Stop()
 	}
@@ -748,7 +748,7 @@ func (c *subscriptionClient) close() {
 	if c.netPoll != nil {
 		err := c.netPoll.Close(false)
 		if err != nil {
-			c.log.Error("subscriptionClient.close", abstractlogger.Error(err))
+			c.log.Error("subscriptionClient.close", logger.Error(err))
 		}
 	}
 }
@@ -763,7 +763,7 @@ func (c *subscriptionClient) handleAddConn(conn *connection) {
 	}
 
 	if err := c.netPoll.Add(netConn); err != nil {
-		c.log.Error("subscriptionClient.handleAddConn", abstractlogger.Error(err))
+		c.log.Error("subscriptionClient.handleAddConn", logger.Error(err))
 		conn.handler.ServerClose()
 		return
 	}

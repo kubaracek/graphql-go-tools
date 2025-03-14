@@ -22,7 +22,7 @@ type gqlTWSConnectionHandler struct {
 	// The underlying net.Conn. Only used for netPoll. Should not be used to shutdown the connection.
 	conn                          net.Conn
 	requestContext, engineContext context.Context
-	log                           abstractlogger.Logger
+	log                           logger.Logger
 	options                       GraphQLSubscriptionOptions
 	updater                       resolve.SubscriptionUpdater
 }
@@ -69,7 +69,7 @@ func (h *gqlTWSConnectionHandler) HandleMessage(data []byte) (done bool) {
 		h.log.Error("Invalid subprotocol. The subprotocol should be set to graphql-transport-ws, but currently it is set to graphql-ws")
 		return true
 	default:
-		h.log.Error("unknown message type", abstractlogger.String("type", messageType))
+		h.log.Error("unknown message type", logger.String("type", messageType))
 		return false
 	}
 }
@@ -78,7 +78,7 @@ func (h *gqlTWSConnectionHandler) NetConn() net.Conn {
 	return h.conn
 }
 
-func newGQLTWSConnectionHandler(requestContext, engineContext context.Context, conn net.Conn, options GraphQLSubscriptionOptions, updater resolve.SubscriptionUpdater, l abstractlogger.Logger) *connection {
+func newGQLTWSConnectionHandler(requestContext, engineContext context.Context, conn net.Conn, options GraphQLSubscriptionOptions, updater resolve.SubscriptionUpdater, l logger.Logger) *connection {
 	handler := &gqlTWSConnectionHandler{
 		conn:           conn,
 		requestContext: requestContext,
@@ -117,7 +117,7 @@ func (h *gqlTWSConnectionHandler) StartBlocking() error {
 		case <-readCtx.Done():
 			return readCtx.Err()
 		case err := <-errCh:
-			h.log.Error("gqlWSConnectionHandler.StartBlocking", abstractlogger.Error(err))
+			h.log.Error("gqlWSConnectionHandler.StartBlocking", logger.Error(err))
 			h.broadcastErrorMessage(err)
 			return err
 		case data := <-dataCh:
@@ -145,7 +145,7 @@ func (h *gqlTWSConnectionHandler) StartBlocking() error {
 				h.log.Error("Invalid subprotocol. The subprotocol should be set to graphql-transport-ws, but currently it is set to graphql-ws")
 				return errors.New("invalid subprotocol")
 			default:
-				h.log.Error("unknown message type", abstractlogger.String("type", messageType))
+				h.log.Error("unknown message type", logger.String("type", messageType))
 				continue
 			}
 		}
@@ -163,7 +163,7 @@ func (h *gqlTWSConnectionHandler) unsubscribe() {
 	req := fmt.Sprintf(completeMessage, "1")
 	err := wsutil.WriteClientText(h.conn, []byte(req))
 	if err != nil {
-		h.log.Error("failed to write complete message", abstractlogger.Error(err))
+		h.log.Error("failed to write complete message", logger.Error(err))
 	}
 }
 
@@ -209,8 +209,8 @@ func (h *gqlTWSConnectionHandler) handleMessageTypeError(data []byte) {
 	if err != nil {
 		h.log.Error(
 			"failed to get payload from error message",
-			abstractlogger.Error(err),
-			abstractlogger.ByteString("raw message", data),
+			logger.Error(err),
+			logger.ByteString("raw message", data),
 		)
 		h.updater.Update([]byte(internalError))
 		return
@@ -223,8 +223,8 @@ func (h *gqlTWSConnectionHandler) handleMessageTypeError(data []byte) {
 		if err != nil {
 			h.log.Error(
 				"failed to set errors response",
-				abstractlogger.Error(err),
-				abstractlogger.ByteString("raw message", value),
+				logger.Error(err),
+				logger.ByteString("raw message", value),
 			)
 			h.updater.Update([]byte(internalError))
 			return
@@ -246,7 +246,7 @@ func (h *gqlTWSConnectionHandler) handleMessageTypeError(data []byte) {
 func (h *gqlTWSConnectionHandler) handleMessageTypePing() {
 	err := wsutil.WriteClientText(h.conn, []byte(pongMessage))
 	if err != nil {
-		h.log.Error("failed to write pong message", abstractlogger.Error(err))
+		h.log.Error("failed to write pong message", logger.Error(err))
 	}
 }
 
@@ -262,7 +262,7 @@ func (h *gqlTWSConnectionHandler) handleMessageTypeNext(data []byte) {
 	if err != nil {
 		h.log.Error(
 			"failed to get payload from next message",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 		h.updater.Update([]byte(internalError))
 		return

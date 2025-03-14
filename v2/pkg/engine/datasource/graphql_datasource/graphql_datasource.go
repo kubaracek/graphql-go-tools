@@ -1706,7 +1706,7 @@ func (p *Planner[T]) releaseKit(kit *printKit) {
 	printKitPool.Put(kit)
 }
 
-func (f *Factory[T]) Planner(logger abstractlogger.Logger) plan.DataSourcePlanner[T] {
+func (f *Factory[T]) Planner(logger logger.Logger) plan.DataSourcePlanner[T] {
 	return &Planner[T]{
 		fetchClient:        f.httpClient,
 		subscriptionClient: f.subscriptionClient,

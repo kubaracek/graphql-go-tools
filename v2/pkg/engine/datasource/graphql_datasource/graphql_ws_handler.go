@@ -23,7 +23,7 @@ type gqlWSConnectionHandler struct {
 	// The underlying net.Conn. Only used for netPoll. Should not be used to shutdown the connection.
 	conn                          net.Conn
 	requestContext, engineContext context.Context
-	log                           abstractlogger.Logger
+	log                           logger.Logger
 	options                       GraphQLSubscriptionOptions
 	updater                       resolve.SubscriptionUpdater
 }
@@ -75,7 +75,7 @@ func (h *gqlWSConnectionHandler) NetConn() net.Conn {
 	return h.conn
 }
 
-func newGQLWSConnectionHandler(requestContext, engineContext context.Context, conn net.Conn, options GraphQLSubscriptionOptions, updater resolve.SubscriptionUpdater, log abstractlogger.Logger) *connection {
+func newGQLWSConnectionHandler(requestContext, engineContext context.Context, conn net.Conn, options GraphQLSubscriptionOptions, updater resolve.SubscriptionUpdater, log logger.Logger) *connection {
 	handler := &gqlWSConnectionHandler{
 		conn:           conn,
 		requestContext: requestContext,
@@ -117,7 +117,7 @@ func (h *gqlWSConnectionHandler) StartBlocking() error {
 			return readCtx.Err()
 		case err := <-errCh:
 			if !errors.Is(err, context.Canceled) && !errors.Is(err, io.EOF) && !errors.Is(err, net.ErrClosed) {
-				h.log.Error("gqlWSConnectionHandler.StartBlocking", abstractlogger.Error(err))
+				h.log.Error("gqlWSConnectionHandler.StartBlocking", logger.Error(err))
 			}
 			h.broadcastErrorMessage(err)
 			return err
@@ -145,7 +145,7 @@ func (h *gqlWSConnectionHandler) StartBlocking() error {
 				h.log.Error("Invalid subprotocol. The subprotocol should be set to graphql-ws, but currently it is set to graphql-transport-ws")
 				return errors.New("invalid subprotocol")
 			default:
-				h.log.Error("unknown message type", abstractlogger.String("type", messageType))
+				h.log.Error("unknown message type", logger.String("type", messageType))
 				continue
 			}
 		}

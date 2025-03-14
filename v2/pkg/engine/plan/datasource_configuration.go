@@ -19,7 +19,7 @@ type DSHash uint64
 // Once the context gets cancelled, all stateful DataSources must close their connections and cleanup themselves.
 type PlannerFactory[DataSourceSpecificConfiguration any] interface {
 	// Planner creates a new DataSourcePlanner
-	Planner(logger abstractlogger.Logger) DataSourcePlanner[DataSourceSpecificConfiguration]
+	Planner(logger logger.Logger) DataSourcePlanner[DataSourceSpecificConfiguration]
 	// Context returns the execution context of the factory
 	// For stateful datasources, the factory should contain cancellable global execution context
 	// This method serves as a flag that factory should have a context
@@ -239,14 +239,14 @@ type DataSource interface {
 	Name() string
 	Hash() DSHash
 	FederationConfiguration() FederationMetaData
-	CreatePlannerConfiguration(logger abstractlogger.Logger, fetchConfig *objectFetchConfiguration, pathConfig *plannerPathsConfiguration, configuration Configuration) PlannerConfiguration
+	CreatePlannerConfiguration(logger logger.Logger, fetchConfig *objectFetchConfiguration, pathConfig *plannerPathsConfiguration, configuration Configuration) PlannerConfiguration
 }
 
 func (d *dataSourceConfiguration[T]) CustomConfiguration() T {
 	return d.custom
 }
 
-func (d *dataSourceConfiguration[T]) CreatePlannerConfiguration(logger abstractlogger.Logger, fetchConfig *objectFetchConfiguration, pathConfig *plannerPathsConfiguration, configuration Configuration) PlannerConfiguration {
+func (d *dataSourceConfiguration[T]) CreatePlannerConfiguration(logger logger.Logger, fetchConfig *objectFetchConfiguration, pathConfig *plannerPathsConfiguration, configuration Configuration) PlannerConfiguration {
 	planner := d.factory.Planner(logger)
 
 	fetchConfig.planner = planner

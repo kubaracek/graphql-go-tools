@@ -357,7 +357,7 @@ func setupExecutorPoolV2(t *testing.T, ctx context.Context, chatServerURL string
 
 	initCtx := subscription.NewInitialHttpRequestContext(req)
 
-	eng, err := engine.NewExecutionEngine(initCtx, abstractlogger.NoopLogger, engineConf, resolve.ResolverOptions{
+	eng, err := engine.NewExecutionEngine(initCtx, logger.NoopLogger, engineConf, resolve.ResolverOptions{
 		MaxConcurrency: 1024,
 	})
 	require.NoError(t, err)

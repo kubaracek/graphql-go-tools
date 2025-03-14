@@ -20,7 +20,7 @@ import (
 // - missing path, which was not planned on the previous walks
 // - we have fields which are waiting for dependencies
 type configurationVisitor struct {
-	logger                             abstractlogger.Logger
+	logger                             logger.Logger
 	plannerConfiguration               Configuration
 	suggestionsSelectionReasonsEnabled bool
 

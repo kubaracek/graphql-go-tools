@@ -35,7 +35,7 @@ type Planner struct {
 // If you don't cancel the context.Context, the goroutines will run indefinitely and there's no reference left to stop them
 func NewPlanner(config Configuration) (*Planner, error) {
 	if config.Logger == nil {
-		config.Logger = abstractlogger.Noop{}
+		config.Logger = logger.Noop{}
 	}
 
 	entityInterfaceNames := make([]string, 0, 1)

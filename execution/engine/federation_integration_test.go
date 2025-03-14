@@ -34,7 +34,7 @@ func addGateway(enableART bool) func(setup *federationtesting.FederationSetup) *
 			{Name: "reviews", URL: setup.ReviewsUpstreamServer.URL},
 		}, httpClient)
 
-		gtw := gateway.Handler(abstractlogger.NoopLogger, poller, httpClient, enableART)
+		gtw := gateway.Handler(logger.NoopLogger, poller, httpClient, enableART)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 		defer cancel()

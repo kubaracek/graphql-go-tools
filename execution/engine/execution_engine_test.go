@@ -244,7 +244,7 @@ func TestExecutionEngine_Execute(t *testing.T) {
 			for _, option := range options {
 				option(&opts)
 			}
-			engine, err := NewExecutionEngine(ctx, abstractlogger.Noop{}, engineConf, resolve.ResolverOptions{
+			engine, err := NewExecutionEngine(ctx, logger.Noop{}, engineConf, resolve.ResolverOptions{
 				MaxConcurrency:    1024,
 				ResolvableOptions: opts.resolvableOptions,
 			})
@@ -4143,7 +4143,7 @@ func TestExecutionEngine_GetCachedPlan(t *testing.T) {
 		),
 	})
 
-	engine, err := NewExecutionEngine(context.Background(), abstractlogger.NoopLogger, engineConfig, resolve.ResolverOptions{
+	engine, err := NewExecutionEngine(context.Background(), logger.NoopLogger, engineConfig, resolve.ResolverOptions{
 		MaxConcurrency: 1024,
 	})
 	require.NoError(t, err)
@@ -4220,7 +4220,7 @@ func BenchmarkIntrospection(b *testing.B) {
 	}
 
 	newEngine := func() *ExecutionEngine {
-		engine, err := NewExecutionEngine(ctx, abstractlogger.NoopLogger, engineConf, resolve.ResolverOptions{
+		engine, err := NewExecutionEngine(ctx, logger.NoopLogger, engineConf, resolve.ResolverOptions{
 			MaxConcurrency: 1024,
 		})
 		require.NoError(b, err)
@@ -4308,7 +4308,7 @@ func BenchmarkExecutionEngine(b *testing.B) {
 			},
 		})
 
-		engine, err := NewExecutionEngine(ctx, abstractlogger.NoopLogger, engineConf, resolve.ResolverOptions{
+		engine, err := NewExecutionEngine(ctx, logger.NoopLogger, engineConf, resolve.ResolverOptions{
 			MaxConcurrency: 1024,
 		})
 		require.NoError(b, err)
@@ -4724,7 +4724,7 @@ func newFederationEngineStaticConfig(ctx context.Context, setup *federationtesti
 		DatasourceVisitor:             false,
 	}
 
-	engine, err = NewExecutionEngine(ctx, abstractlogger.Noop{}, engineConfig, resolve.ResolverOptions{
+	engine, err = NewExecutionEngine(ctx, logger.Noop{}, engineConfig, resolve.ResolverOptions{
 		MaxConcurrency: 1024,
 	})
 	if err != nil {

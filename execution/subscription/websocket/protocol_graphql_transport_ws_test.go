@@ -24,7 +24,7 @@ func TestGraphQLTransportWSMessageReader_Read(t *testing.T) {
 		}
 
 		reader := GraphQLTransportWSMessageReader{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 		}
 		message, err := reader.Read(data)
 		assert.NoError(t, err)
@@ -40,7 +40,7 @@ func TestGraphQLTransportWSMessageReader_Read(t *testing.T) {
 		}
 
 		reader := GraphQLTransportWSMessageReader{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 		}
 		message, err := reader.Read(data)
 		assert.NoError(t, err)
@@ -70,7 +70,7 @@ func TestGraphQLTransportWSMessageReader_Read(t *testing.T) {
 		}
 
 		reader := GraphQLTransportWSMessageReader{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 		}
 		message, err := reader.Read(data)
 		assert.NoError(t, err)
@@ -92,7 +92,7 @@ func TestGraphQLTransportWSMessageWriter_WriteConnectionAck(t *testing.T) {
 	t.Run("should return error when error occurs on underlying call", func(t *testing.T) {
 		testClient := NewTestClient(true)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -102,7 +102,7 @@ func TestGraphQLTransportWSMessageWriter_WriteConnectionAck(t *testing.T) {
 	t.Run("should successfully write ack message to client", func(t *testing.T) {
 		testClient := NewTestClient(false)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -117,7 +117,7 @@ func TestGraphQLTransportWSMessageWriter_WritePing(t *testing.T) {
 	t.Run("should return error when error occurs on underlying call", func(t *testing.T) {
 		testClient := NewTestClient(true)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -127,7 +127,7 @@ func TestGraphQLTransportWSMessageWriter_WritePing(t *testing.T) {
 	t.Run("should successfully write ping message to client", func(t *testing.T) {
 		testClient := NewTestClient(false)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -139,7 +139,7 @@ func TestGraphQLTransportWSMessageWriter_WritePing(t *testing.T) {
 	t.Run("should successfully write ping message with payload to client", func(t *testing.T) {
 		testClient := NewTestClient(false)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -154,7 +154,7 @@ func TestGraphQLTransportWSMessageWriter_WritePong(t *testing.T) {
 	t.Run("should return error when error occurs on underlying call", func(t *testing.T) {
 		testClient := NewTestClient(true)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -164,7 +164,7 @@ func TestGraphQLTransportWSMessageWriter_WritePong(t *testing.T) {
 	t.Run("should successfully write pong message to client", func(t *testing.T) {
 		testClient := NewTestClient(false)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -176,7 +176,7 @@ func TestGraphQLTransportWSMessageWriter_WritePong(t *testing.T) {
 	t.Run("should successfully write pong message with payload to client", func(t *testing.T) {
 		testClient := NewTestClient(false)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -191,7 +191,7 @@ func TestGraphQLTransportWSMessageWriter_WriteNext(t *testing.T) {
 	t.Run("should return error when error occurs on underlying call", func(t *testing.T) {
 		testClient := NewTestClient(true)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -201,7 +201,7 @@ func TestGraphQLTransportWSMessageWriter_WriteNext(t *testing.T) {
 	t.Run("should successfully write next message with payload to client", func(t *testing.T) {
 		testClient := NewTestClient(false)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -216,7 +216,7 @@ func TestGraphQLTransportWSMessageWriter_WriteError(t *testing.T) {
 	t.Run("should return error when error occurs on underlying call", func(t *testing.T) {
 		testClient := NewTestClient(true)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -226,7 +226,7 @@ func TestGraphQLTransportWSMessageWriter_WriteError(t *testing.T) {
 	t.Run("should successfully write error message with payload to client", func(t *testing.T) {
 		testClient := NewTestClient(false)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -242,7 +242,7 @@ func TestGraphQLTransportWSMessageWriter_WriteComplete(t *testing.T) {
 	t.Run("should return error when error occurs on underlying call", func(t *testing.T) {
 		testClient := NewTestClient(true)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -252,7 +252,7 @@ func TestGraphQLTransportWSMessageWriter_WriteComplete(t *testing.T) {
 	t.Run("should successfully write complete message to client", func(t *testing.T) {
 		testClient := NewTestClient(false)
 		writer := GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			Client: testClient,
 			mu:     &sync.Mutex{},
 		}
@@ -549,9 +549,9 @@ func TestProtocolGraphQLTransportWSHandler_Handle(t *testing.T) {
 
 func NewTestGraphQLTransportWSEventHandler(testClient subscription.TransportClient) GraphQLTransportWSEventHandler {
 	return GraphQLTransportWSEventHandler{
-		logger: abstractlogger.Noop{},
+		logger: logger.Noop{},
 		Writer: GraphQLTransportWSMessageWriter{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 			mu:     &sync.Mutex{},
 			Client: testClient,
 		},
@@ -560,9 +560,9 @@ func NewTestGraphQLTransportWSEventHandler(testClient subscription.TransportClie
 
 func NewTestProtocolGraphQLTransportWSHandler(testClient subscription.TransportClient) *ProtocolGraphQLTransportWSHandler {
 	return &ProtocolGraphQLTransportWSHandler{
-		logger: abstractlogger.Noop{},
+		logger: logger.Noop{},
 		reader: GraphQLTransportWSMessageReader{
-			logger: abstractlogger.Noop{},
+			logger: logger.Noop{},
 		},
 		eventHandler:                  NewTestGraphQLTransportWSEventHandler(testClient),
 		heartbeatInterval:             30,

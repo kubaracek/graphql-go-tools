@@ -37,7 +37,7 @@ type Engine interface {
 
 // ExecutorEngine is an implementation of Engine and works with subscription.Executor.
 type ExecutorEngine struct {
-	logger abstractlogger.Logger
+	logger logger.Logger
 	// subCancellations is map containing the cancellation functions to every active subscription.
 	subCancellations subscriptionCancellations
 	// executorPool is responsible to create and hold executors.
@@ -125,7 +125,7 @@ func (e *ExecutorEngine) startSubscription(ctx context.Context, id string, execu
 		err := e.executorPool.Put(executor)
 		if err != nil {
 			e.logger.Error("subscription.Handle.startSubscription()",
-				abstractlogger.Error(err),
+				logger.Error(err),
 			)
 		}
 	}()
@@ -153,7 +153,7 @@ func (e *ExecutorEngine) startSubscription(ctx context.Context, id string, execu
 func (e *ExecutorEngine) executeSubscription(buf *graphql.EngineResultWriter, id string, executor Executor, eventHandler EventHandler) {
 	buf.SetFlushCallback(func(data []byte) {
 		e.logger.Debug("subscription.Handle.executeSubscription()",
-			abstractlogger.ByteString("execution_result", data),
+			logger.ByteString("execution_result", data),
 		)
 		eventHandler.Emit(EventTypeOnSubscriptionData, id, data, nil)
 	})
@@ -162,7 +162,7 @@ func (e *ExecutorEngine) executeSubscription(buf *graphql.EngineResultWriter, id
 	err := executor.Execute(buf)
 	if err != nil {
 		e.logger.Error("subscription.Handle.executeSubscription()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 
 		eventHandler.Emit(EventTypeOnError, id, nil, err)
@@ -172,7 +172,7 @@ func (e *ExecutorEngine) executeSubscription(buf *graphql.EngineResultWriter, id
 	if buf.Len() > 0 {
 		data := buf.Bytes()
 		e.logger.Debug("subscription.Handle.executeSubscription()",
-			abstractlogger.ByteString("execution_result", data),
+			logger.ByteString("execution_result", data),
 		)
 		eventHandler.Emit(EventTypeOnSubscriptionData, id, data, nil)
 	}
@@ -184,7 +184,7 @@ func (e *ExecutorEngine) handleNonSubscriptionOperation(ctx context.Context, id 
 		err := e.executorPool.Put(executor)
 		if err != nil {
 			e.logger.Error("subscription.Handle.handleNonSubscriptionOperation()",
-				abstractlogger.Error(err),
+				logger.Error(err),
 			)
 		}
 	}()
@@ -198,7 +198,7 @@ func (e *ExecutorEngine) handleNonSubscriptionOperation(ctx context.Context, id 
 	err := executor.Execute(buf)
 	if err != nil {
 		e.logger.Error("subscription.Handle.handleNonSubscriptionOperation()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 
 		eventHandler.Emit(EventTypeOnError, id, nil, err)
@@ -206,7 +206,7 @@ func (e *ExecutorEngine) handleNonSubscriptionOperation(ctx context.Context, id 
 	}
 
 	e.logger.Debug("subscription.Handle.handleNonSubscriptionOperation()",
-		abstractlogger.ByteString("execution_result", buf.Bytes()),
+		logger.ByteString("execution_result", buf.Bytes()),
 	)
 
 	eventHandler.Emit(EventTypeOnNonSubscriptionExecutionResult, id, buf.Bytes(), err)

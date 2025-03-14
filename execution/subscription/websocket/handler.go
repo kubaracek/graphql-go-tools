@@ -30,7 +30,7 @@ var DefaultProtocol = ProtocolGraphQLTransportWS
 
 // HandleOptions can be used to pass options to the websocket handler.
 type HandleOptions struct {
-	Logger                           abstractlogger.Logger
+	Logger                           logger.Logger
 	Protocol                         Protocol
 	WebSocketInitFunc                InitFunc
 	CustomClient                     subscription.TransportClient
@@ -45,7 +45,7 @@ type HandleOptions struct {
 type HandleOptionFunc func(opts *HandleOptions)
 
 // WithLogger is a function that sets a logger for the websocket handler.
-func WithLogger(logger abstractlogger.Logger) HandleOptionFunc {
+func WithLogger(logger logger.Logger) HandleOptionFunc {
 	return func(opts *HandleOptions) {
 		opts.Logger = logger
 	}
@@ -135,7 +135,7 @@ func WithProtocolFromRequestHeaders(req *http.Request) HandleOptionFunc {
 // behavior. By default, it uses the 'graphql-transport-ws' protocol.
 func Handle(done chan bool, errChan chan error, conn net.Conn, executorPool subscription.ExecutorPool, options ...HandleOptionFunc) {
 	definedOptions := HandleOptions{
-		Logger:   abstractlogger.Noop{},
+		Logger:   logger.Noop{},
 		Protocol: DefaultProtocol,
 	}
 
@@ -150,14 +150,14 @@ func Handle(done chan bool, errChan chan error, conn net.Conn, executorPool subs
 func HandleWithOptions(done chan bool, errChan chan error, conn net.Conn, executorPool subscription.ExecutorPool, options HandleOptions) {
 	// Use noop logger to prevent nil pointers if none was provided
 	if options.Logger == nil {
-		options.Logger = abstractlogger.Noop{}
+		options.Logger = logger.Noop{}
 	}
 
 	defer func() {
 		if err := conn.Close(); err != nil {
 			options.Logger.Error("websocket.HandleWithOptions: on deferred closing connection",
-				abstractlogger.String("message", "could not close connection to client"),
-				abstractlogger.Error(err),
+				logger.String("message", "could not close connection to client"),
+				logger.Error(err),
 			)
 		}
 	}()
@@ -172,9 +172,9 @@ func HandleWithOptions(done chan bool, errChan chan error, conn net.Conn, execut
 	protocolHandler, err := createProtocolHandler(options, client)
 	if err != nil {
 		options.Logger.Error("websocket.HandleWithOptions: on protocol handler creation",
-			abstractlogger.String("message", "could not create protocol handler"),
-			abstractlogger.String("protocol", string(DefaultProtocol)),
-			abstractlogger.Error(err),
+			logger.String("message", "could not create protocol handler"),
+			logger.String("protocol", string(DefaultProtocol)),
+			logger.Error(err),
 		)
 
 		errChan <- err
@@ -189,9 +189,9 @@ func HandleWithOptions(done chan bool, errChan chan error, conn net.Conn, execut
 	})
 	if err != nil {
 		options.Logger.Error("websocket.HandleWithOptions: on subscription handler creation",
-			abstractlogger.String("message", "could not create subscription handler"),
-			abstractlogger.String("protocol", string(DefaultProtocol)),
-			abstractlogger.Error(err),
+			logger.String("message", "could not create subscription handler"),
+			logger.String("protocol", string(DefaultProtocol)),
+			logger.Error(err),
 		)
 
 		errChan <- err

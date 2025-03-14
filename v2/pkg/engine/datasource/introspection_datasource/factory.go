@@ -18,7 +18,7 @@ func NewFactory[T Configuration](introspectionData *introspection.Data) *Factory
 	return &Factory[T]{introspectionData: introspectionData}
 }
 
-func (f *Factory[T]) Planner(logger abstractlogger.Logger) plan.DataSourcePlanner[T] {
+func (f *Factory[T]) Planner(logger logger.Logger) plan.DataSourcePlanner[T] {
 	return &Planner[T]{introspectionData: f.introspectionData}
 }
 

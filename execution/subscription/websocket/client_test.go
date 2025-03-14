@@ -29,7 +29,7 @@ type testServerWebsocketResponse struct {
 func TestClient_WriteToClient(t *testing.T) {
 	t.Run("should write successfully to client", func(t *testing.T) {
 		connToServer, connToClient := net.Pipe()
-		websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+		websocketClient := NewClient(logger.NoopLogger, connToClient)
 		messageToClient := []byte(`{
 			"id": "1",
 			"type": "data",
@@ -53,7 +53,7 @@ func TestClient_WriteToClient(t *testing.T) {
 		t.Run("when not wrapped", func(t *testing.T) {
 			t.Run("io: read/write on closed pipe", func(t *testing.T) {
 				connToServer, connToClient := net.Pipe()
-				websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+				websocketClient := NewClient(logger.NoopLogger, connToClient)
 				err := connToServer.Close()
 				require.NoError(t, err)
 
@@ -72,7 +72,7 @@ func TestClient_WriteToClient(t *testing.T) {
 					),
 				)
 				connToClient.setWriteReturns(0, wrappedErr)
-				websocketClient := NewClient(abstractlogger.NoopLogger, &connToClient)
+				websocketClient := NewClient(logger.NoopLogger, &connToClient)
 
 				err := websocketClient.WriteBytesToClient([]byte("message"))
 				assert.Equal(t, subscription.ErrTransportClientClosedConnection, err)
@@ -85,7 +85,7 @@ func TestClient_WriteToClient(t *testing.T) {
 func TestClient_ReadFromClient(t *testing.T) {
 	t.Run("should successfully read from client", func(t *testing.T) {
 		connToServer, connToClient := net.Pipe()
-		websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+		websocketClient := NewClient(logger.NoopLogger, connToClient)
 
 		messageToServer := []byte(`{
 			"id": "1",
@@ -107,7 +107,7 @@ func TestClient_ReadFromClient(t *testing.T) {
 	t.Run("should detect a closed connection", func(t *testing.T) {
 		t.Run("before read", func(t *testing.T) {
 			_, connToClient := net.Pipe()
-			websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+			websocketClient := NewClient(logger.NoopLogger, connToClient)
 			defer connToClient.Close()
 			websocketClient.isClosedConnection = true
 
@@ -119,7 +119,7 @@ func TestClient_ReadFromClient(t *testing.T) {
 		t.Run("when not wrapped", func(t *testing.T) {
 			t.Run("io.EOF", func(t *testing.T) {
 				connToServer, connToClient := net.Pipe()
-				websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+				websocketClient := NewClient(logger.NoopLogger, connToClient)
 				err := connToServer.Close()
 				require.NoError(t, err)
 
@@ -130,7 +130,7 @@ func TestClient_ReadFromClient(t *testing.T) {
 			t.Run("io: read/write on closed pipe", func(t *testing.T) {
 				connToClient := &FakeConn{}
 				connToClient.setReadReturns(0, io.ErrClosedPipe)
-				websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+				websocketClient := NewClient(logger.NoopLogger, connToClient)
 
 				_, err := websocketClient.ReadBytesFromClient()
 				assert.Equal(t, subscription.ErrTransportClientClosedConnection, err)
@@ -139,7 +139,7 @@ func TestClient_ReadFromClient(t *testing.T) {
 			t.Run("unexpected EOF", func(t *testing.T) {
 				connToClient := &FakeConn{}
 				connToClient.setReadReturns(0, io.ErrUnexpectedEOF)
-				websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+				websocketClient := NewClient(logger.NoopLogger, connToClient)
 
 				_, err := websocketClient.ReadBytesFromClient()
 				assert.Equal(t, subscription.ErrTransportClientClosedConnection, err)
@@ -156,7 +156,7 @@ func TestClient_ReadFromClient(t *testing.T) {
 					),
 				)
 				connToClient.setReadReturns(0, wrappedErr)
-				websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+				websocketClient := NewClient(logger.NoopLogger, connToClient)
 
 				_, err := websocketClient.ReadBytesFromClient()
 				assert.Equal(t, subscription.ErrTransportClientClosedConnection, err)
@@ -170,7 +170,7 @@ func TestClient_ReadFromClient(t *testing.T) {
 					),
 				)
 				connToClient.setReadReturns(0, wrappedErr)
-				websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+				websocketClient := NewClient(logger.NoopLogger, connToClient)
 
 				_, err := websocketClient.ReadBytesFromClient()
 				assert.Equal(t, subscription.ErrTransportClientClosedConnection, err)
@@ -184,7 +184,7 @@ func TestClient_ReadFromClient(t *testing.T) {
 					),
 				)
 				connToClient.setReadReturns(0, wrappedErr)
-				websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+				websocketClient := NewClient(logger.NoopLogger, connToClient)
 
 				_, err := websocketClient.ReadBytesFromClient()
 				assert.Equal(t, subscription.ErrTransportClientClosedConnection, err)
@@ -197,7 +197,7 @@ func TestClient_ReadFromClient(t *testing.T) {
 
 func TestClient_IsConnected(t *testing.T) {
 	_, connToClient := net.Pipe()
-	websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+	websocketClient := NewClient(logger.NoopLogger, connToClient)
 
 	t.Run("should return true when a connection is established", func(t *testing.T) {
 		isConnected := websocketClient.IsConnected()
@@ -217,7 +217,7 @@ func TestClient_IsConnected(t *testing.T) {
 
 func TestClient_Disconnect(t *testing.T) {
 	_, connToClient := net.Pipe()
-	websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+	websocketClient := NewClient(logger.NoopLogger, connToClient)
 
 	t.Run("should disconnect and indicate a closed connection", func(t *testing.T) {
 		err := websocketClient.Disconnect()
@@ -229,7 +229,7 @@ func TestClient_Disconnect(t *testing.T) {
 func TestClient_DisconnectWithReason(t *testing.T) {
 	t.Run("disconnect with invalid reason", func(t *testing.T) {
 		connToServer, connToClient := net.Pipe()
-		websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+		websocketClient := NewClient(logger.NoopLogger, connToClient)
 		serverResponseChan := make(chan testServerWebsocketResponse)
 
 		go readServerResponse(serverResponseChan, connToServer)
@@ -254,7 +254,7 @@ func TestClient_DisconnectWithReason(t *testing.T) {
 
 	t.Run("disconnect with reason", func(t *testing.T) {
 		connToServer, connToClient := net.Pipe()
-		websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+		websocketClient := NewClient(logger.NoopLogger, connToClient)
 		serverResponseChan := make(chan testServerWebsocketResponse)
 
 		go readServerResponse(serverResponseChan, connToServer)
@@ -279,7 +279,7 @@ func TestClient_DisconnectWithReason(t *testing.T) {
 
 	t.Run("disconnect with compiled reason", func(t *testing.T) {
 		connToServer, connToClient := net.Pipe()
-		websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+		websocketClient := NewClient(logger.NoopLogger, connToClient)
 		serverResponseChan := make(chan testServerWebsocketResponse)
 
 		go readServerResponse(serverResponseChan, connToServer)
@@ -307,7 +307,7 @@ func TestClient_isClosedConnectionError(t *testing.T) {
 	_, connToClient := net.Pipe()
 
 	t.Run("should not close connection when it is not a closed connection error", func(t *testing.T) {
-		websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+		websocketClient := NewClient(logger.NoopLogger, connToClient)
 		require.False(t, websocketClient.isClosedConnection)
 
 		isClosedConnectionError := websocketClient.isClosedConnectionError(errors.New("no closed connection err"))
@@ -315,7 +315,7 @@ func TestClient_isClosedConnectionError(t *testing.T) {
 	})
 
 	t.Run("should close connection when it is a closed connection error", func(t *testing.T) {
-		websocketClient := NewClient(abstractlogger.NoopLogger, connToClient)
+		websocketClient := NewClient(logger.NoopLogger, connToClient)
 		require.False(t, websocketClient.isClosedConnection)
 
 		isClosedConnectionError := websocketClient.isClosedConnectionError(wsutil.ClosedError{})

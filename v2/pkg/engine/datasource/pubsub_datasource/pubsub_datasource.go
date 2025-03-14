@@ -301,7 +301,7 @@ type Factory[T Configuration] struct {
 	kafkaPubSubByProviderID map[string]KafkaPubSub
 }
 
-func (f *Factory[T]) Planner(_ abstractlogger.Logger) plan.DataSourcePlanner[T] {
+func (f *Factory[T]) Planner(_ logger.Logger) plan.DataSourcePlanner[T] {
 	return &Planner[T]{
 		natsPubSubByProviderID:  f.natsPubSubByProviderID,
 		kafkaPubSubByProviderID: f.kafkaPubSubByProviderID,

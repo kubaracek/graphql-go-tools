@@ -18,7 +18,7 @@ type Configuration struct {
 
 type Factory[T Configuration] struct{}
 
-func (f *Factory[T]) Planner(logger abstractlogger.Logger) plan.DataSourcePlanner[T] {
+func (f *Factory[T]) Planner(logger logger.Logger) plan.DataSourcePlanner[T] {
 	return &Planner[T]{}
 }
 

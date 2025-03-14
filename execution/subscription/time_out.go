@@ -10,7 +10,7 @@ import (
 // TimeOutParams is a struct to configure a TimeOutChecker.
 type TimeOutParams struct {
 	Name            string
-	Logger          abstractlogger.Logger
+	Logger          logger.Logger
 	TimeOutContext  context.Context
 	TimeOutAction   func()
 	TimeOutDuration time.Duration
@@ -29,7 +29,7 @@ func TimeOutChecker(params TimeOutParams) {
 			return
 		case <-timer.C:
 			params.Logger.Error("time out happened",
-				abstractlogger.String("name", params.Name),
+				logger.String("name", params.Name),
 			)
 			params.TimeOutAction()
 			return

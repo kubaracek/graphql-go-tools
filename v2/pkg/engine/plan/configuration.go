@@ -7,7 +7,7 @@ import (
 )
 
 type Configuration struct {
-	Logger                             abstractlogger.Logger
+	Logger                             logger.Logger
 	DefaultFlushIntervalMillis         int64
 	DataSources                        []DataSource
 	MaxDataSourceCollectorsConcurrency uint

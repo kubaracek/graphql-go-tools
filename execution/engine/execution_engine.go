@@ -63,7 +63,7 @@ func (e *internalExecutionContext) reset() {
 }
 
 type ExecutionEngine struct {
-	logger                   abstractlogger.Logger
+	logger                   logger.Logger
 	config                   Configuration
 	resolver                 *resolve.Resolver
 	executionPlanCache       *lru.Cache
@@ -109,7 +109,7 @@ func WithRequestTraceOptions(options resolve.TraceOptions) ExecutionOptions {
 	}
 }
 
-func NewExecutionEngine(ctx context.Context, logger abstractlogger.Logger, engineConfig Configuration, resolverOptions resolve.ResolverOptions) (*ExecutionEngine, error) {
+func NewExecutionEngine(ctx context.Context, logger logger.Logger, engineConfig Configuration, resolverOptions resolve.ResolverOptions) (*ExecutionEngine, error) {
 	executionPlanCache, err := lru.New(1024)
 	if err != nil {
 		return nil, err

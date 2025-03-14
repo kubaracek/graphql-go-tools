@@ -44,7 +44,7 @@ func TestUniversalProtocolHandler_Handle(t *testing.T) {
 		ctx, cancelFunc := context.WithCancel(context.Background())
 
 		options := UniversalProtocolHandlerOptions{
-			Logger:                           abstractlogger.Noop{},
+			Logger:                           logger.Noop{},
 			CustomSubscriptionUpdateInterval: 0,
 			CustomEngine:                     engineMock,
 		}
@@ -94,7 +94,7 @@ func TestUniversalProtocolHandler_Handle(t *testing.T) {
 		ctx, cancelFunc := context.WithCancel(context.Background())
 
 		options := UniversalProtocolHandlerOptions{
-			Logger:                           abstractlogger.Noop{},
+			Logger:                           logger.Noop{},
 			CustomSubscriptionUpdateInterval: 0,
 			CustomEngine:                     engineMock,
 		}
@@ -146,7 +146,7 @@ func TestUniversalProtocolHandler_Handle(t *testing.T) {
 		ctx, cancelFunc := context.WithCancel(context.Background())
 
 		options := UniversalProtocolHandlerOptions{
-			Logger:                           abstractlogger.Noop{},
+			Logger:                           logger.Noop{},
 			CustomSubscriptionUpdateInterval: 0,
 			CustomEngine:                     engineMock,
 		}
@@ -199,7 +199,7 @@ func TestUniversalProtocolHandler_Handle(t *testing.T) {
 			MinTimes(1)
 
 		options := UniversalProtocolHandlerOptions{
-			Logger:                           abstractlogger.Noop{},
+			Logger:                           logger.Noop{},
 			CustomSubscriptionUpdateInterval: 0,
 			CustomEngine:                     engineMock,
 		}
@@ -253,7 +253,7 @@ func TestUniversalProtocolHandler_Handle(t *testing.T) {
 			defer cancelFunc()
 
 			options := UniversalProtocolHandlerOptions{
-				Logger:                           abstractlogger.Noop{},
+				Logger:                           logger.Noop{},
 				CustomSubscriptionUpdateInterval: 0,
 				CustomReadErrorTimeOut:           5 * time.Millisecond,
 				CustomEngine:                     engineMock,
@@ -317,7 +317,7 @@ func TestUniversalProtocolHandler_Handle(t *testing.T) {
 			ctx, cancelFunc := context.WithCancel(context.Background())
 
 			options := UniversalProtocolHandlerOptions{
-				Logger:                           abstractlogger.Noop{},
+				Logger:                           logger.Noop{},
 				CustomSubscriptionUpdateInterval: 0,
 				CustomReadErrorTimeOut:           5 * time.Millisecond,
 				CustomEngine:                     engineMock,

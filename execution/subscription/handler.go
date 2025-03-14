@@ -44,7 +44,7 @@ type EventHandler interface {
 
 // UniversalProtocolHandlerOptions is struct that defines options for the UniversalProtocolHandler.
 type UniversalProtocolHandlerOptions struct {
-	Logger                           abstractlogger.Logger
+	Logger                           logger.Logger
 	CustomSubscriptionUpdateInterval time.Duration
 	CustomReadErrorTimeOut           time.Duration
 	CustomEngine                     Engine
@@ -52,7 +52,7 @@ type UniversalProtocolHandlerOptions struct {
 
 // UniversalProtocolHandler can handle any protocol by using the Protocol interface.
 type UniversalProtocolHandler struct {
-	logger                    abstractlogger.Logger
+	logger                    logger.Logger
 	client                    TransportClient
 	protocol                  Protocol
 	engine                    Engine
@@ -64,7 +64,7 @@ type UniversalProtocolHandler struct {
 // NewUniversalProtocolHandler creates a new UniversalProtocolHandler.
 func NewUniversalProtocolHandler(client TransportClient, protocol Protocol, executorPool ExecutorPool) (*UniversalProtocolHandler, error) {
 	options := UniversalProtocolHandlerOptions{
-		Logger: abstractlogger.Noop{},
+		Logger: logger.Noop{},
 	}
 
 	return NewUniversalProtocolHandlerWithOptions(client, protocol, executorPool, options)
@@ -73,7 +73,7 @@ func NewUniversalProtocolHandler(client TransportClient, protocol Protocol, exec
 // NewUniversalProtocolHandlerWithOptions creates a new UniversalProtocolHandler. It requires an option struct.
 func NewUniversalProtocolHandlerWithOptions(client TransportClient, protocol Protocol, executorPool ExecutorPool, options UniversalProtocolHandlerOptions) (*UniversalProtocolHandler, error) {
 	handler := UniversalProtocolHandler{
-		logger:   abstractlogger.Noop{},
+		logger:   logger.Noop{},
 		client:   client,
 		protocol: protocol,
 	}
@@ -129,7 +129,7 @@ func (u *UniversalProtocolHandler) Handle(ctx context.Context) {
 		err := u.engine.TerminateAllSubscriptions(u.protocol.EventHandler())
 		if err != nil {
 			u.logger.Error("subscription.UniversalProtocolHandler.Handle: on terminate connections",
-				abstractlogger.Error(err),
+				logger.Error(err),
 			)
 		}
 		cancel()
@@ -140,7 +140,7 @@ func (u *UniversalProtocolHandler) Handle(ctx context.Context) {
 	for {
 		if !u.client.IsConnected() {
 			u.logger.Debug("subscription.UniversalProtocolHandler.Handle: on client is connected check",
-				abstractlogger.String("message", "client has disconnected"),
+				logger.String("message", "client has disconnected"),
 			)
 
 			return
@@ -152,8 +152,8 @@ func (u *UniversalProtocolHandler) Handle(ctx context.Context) {
 			return
 		} else if err != nil {
 			u.logger.Error("subscription.UniversalProtocolHandler.Handle: on reading bytes from client",
-				abstractlogger.Error(err),
-				abstractlogger.ByteString("message", message),
+				logger.Error(err),
+				logger.ByteString("message", message),
 			)
 
 			if !u.isReadTimeOutTimerRunning {
@@ -188,12 +188,12 @@ func (u *UniversalProtocolHandler) Handle(ctx context.Context) {
 						// if we do have an errOnBeforeStartHookFailure than the error is expected and should be
 						// logged as 'Debug'.
 						u.logger.Debug("subscription.UniversalProtocolHandler.Handle: on protocol handling message",
-							abstractlogger.Error(err),
+							logger.Error(err),
 						)
 					} else {
 						// all other errors should be treated as unexpected and therefore being logged as 'Error'.
 						u.logger.Error("subscription.UniversalProtocolHandler.Handle: on protocol handling message",
-							abstractlogger.Error(err),
+							logger.Error(err),
 						)
 					}
 				}

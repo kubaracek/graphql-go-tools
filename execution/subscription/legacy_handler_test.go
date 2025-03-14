@@ -637,7 +637,7 @@ func setupEngineV2(t *testing.T, ctx context.Context, chatServerURL string) (*Ex
 
 	initCtx := NewInitialHttpRequestContext(req)
 
-	eng, err := engine.NewExecutionEngine(initCtx, abstractlogger.NoopLogger, engineConf, resolve.ResolverOptions{
+	eng, err := engine.NewExecutionEngine(initCtx, logger.NoopLogger, engineConf, resolve.ResolverOptions{
 		MaxConcurrency: 1024,
 	})
 	require.NoError(t, err)
@@ -659,7 +659,7 @@ func setupSubscriptionHandlerWithInitFuncTest(
 	client = newMockClient()
 
 	var err error
-	subscriptionHandler, err = NewHandlerWithInitFunc(abstractlogger.NoopLogger, client, executorPool, initFunc)
+	subscriptionHandler, err = NewHandlerWithInitFunc(logger.NoopLogger, client, executorPool, initFunc)
 	require.NoError(t, err)
 
 	routine = func(ctx context.Context) func() bool {

@@ -14,7 +14,7 @@ import (
 
 // WebsocketSubscriptionClient is an actual implementation of the subscription client interface.
 type WebsocketSubscriptionClient struct {
-	logger abstractlogger.Logger
+	logger logger.Logger
 	// clientConn holds the actual connection to the client.
 	clientConn net.Conn
 	// isClosedConnection indicates if the websocket connection is closed.
@@ -22,7 +22,7 @@ type WebsocketSubscriptionClient struct {
 }
 
 // NewWebsocketSubscriptionClient will create a new websocket subscription client.
-func NewWebsocketSubscriptionClient(logger abstractlogger.Logger, clientConn net.Conn) *WebsocketSubscriptionClient {
+func NewWebsocketSubscriptionClient(logger logger.Logger, clientConn net.Conn) *WebsocketSubscriptionClient {
 	return &WebsocketSubscriptionClient{
 		logger:     logger,
 		clientConn: clientConn,
@@ -41,9 +41,9 @@ func (w *WebsocketSubscriptionClient) ReadFromClient() (message *subscription.Me
 		}
 
 		w.logger.Error("http.WebsocketSubscriptionClient.ReadFromClient()",
-			abstractlogger.Error(err),
-			abstractlogger.ByteString("data", data),
-			abstractlogger.Any("opCode", opCode),
+			logger.Error(err),
+			logger.ByteString("data", data),
+			logger.Any("opCode", opCode),
 		)
 
 		w.isClosedConnectionError(err)
@@ -54,9 +54,9 @@ func (w *WebsocketSubscriptionClient) ReadFromClient() (message *subscription.Me
 	err = json.Unmarshal(data, &message)
 	if err != nil {
 		w.logger.Error("http.WebsocketSubscriptionClient.ReadFromClient()",
-			abstractlogger.Error(err),
-			abstractlogger.ByteString("data", data),
-			abstractlogger.Any("opCode", opCode),
+			logger.Error(err),
+			logger.ByteString("data", data),
+			logger.Any("opCode", opCode),
 		)
 
 		return nil, err
@@ -74,8 +74,8 @@ func (w *WebsocketSubscriptionClient) WriteToClient(message subscription.Message
 	messageBytes, err := json.Marshal(message)
 	if err != nil {
 		w.logger.Error("http.WebsocketSubscriptionClient.WriteToClient()",
-			abstractlogger.Error(err),
-			abstractlogger.Any("message", message),
+			logger.Error(err),
+			logger.Any("message", message),
 		)
 
 		return err
@@ -84,8 +84,8 @@ func (w *WebsocketSubscriptionClient) WriteToClient(message subscription.Message
 	err = wsutil.WriteServerMessage(w.clientConn, ws.OpText, messageBytes)
 	if err != nil {
 		w.logger.Error("http.WebsocketSubscriptionClient.WriteToClient()",
-			abstractlogger.Error(err),
-			abstractlogger.ByteString("messageBytes", messageBytes),
+			logger.Error(err),
+			logger.ByteString("messageBytes", messageBytes),
 		)
 
 		return err
@@ -102,7 +102,7 @@ func (w *WebsocketSubscriptionClient) IsConnected() bool {
 // Disconnect will close the websocket connection.
 func (w *WebsocketSubscriptionClient) Disconnect() error {
 	w.logger.Debug("http.GraphQLHTTPRequestHandler.Disconnect()",
-		abstractlogger.String("message", "disconnecting client"),
+		logger.String("message", "disconnecting client"),
 	)
 	w.isClosedConnection = true
 	return w.clientConn.Close()
@@ -117,12 +117,12 @@ func (w *WebsocketSubscriptionClient) isClosedConnectionError(err error) bool {
 	return w.isClosedConnection
 }
 
-func HandleWebsocket(done chan bool, errChan chan error, conn net.Conn, executorPool subscription.ExecutorPool, logger abstractlogger.Logger) {
+func HandleWebsocket(done chan bool, errChan chan error, conn net.Conn, executorPool subscription.ExecutorPool, logger logger.Logger) {
 	defer func() {
 		if err := conn.Close(); err != nil {
 			logger.Error("http.HandleWebsocket()",
-				abstractlogger.String("message", "could not close connection to client"),
-				abstractlogger.Error(err),
+				logger.String("message", "could not close connection to client"),
+				logger.Error(err),
 			)
 		}
 	}()
@@ -131,8 +131,8 @@ func HandleWebsocket(done chan bool, errChan chan error, conn net.Conn, executor
 	subscriptionHandler, err := subscription.NewHandler(logger, websocketClient, executorPool)
 	if err != nil {
 		logger.Error("http.HandleWebsocket()",
-			abstractlogger.String("message", "could not create subscriptionHandler"),
-			abstractlogger.Error(err),
+			logger.String("message", "could not create subscriptionHandler"),
+			logger.Error(err),
 		)
 
 		errChan <- err
@@ -153,7 +153,7 @@ func (g *GraphQLHTTPRequestHandler) handleWebsocket(connInitReqCtx context.Conte
 	select {
 	case err := <-errChan:
 		g.log.Error("http.GraphQLHTTPRequestHandler.handleWebsocket()",
-			abstractlogger.Error(err),
+			logger.Error(err),
 		)
 	case <-done:
 	}
